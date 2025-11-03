@@ -829,25 +829,26 @@ end while</pre>
         const loginMessage = document.getElementById('loginMessage');
         const signupMessage = document.getElementById('signupMessage');
 
-        // Initialize the application
+        // Initialize the application - Always show login page first
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuthentication();
+            // Always show login page on fresh load
+            showAuth();
             setupEventListeners();
+            
+            // Check if user is already logged in (but don't show compiler yet)
+            checkAuthenticationSilent();
         });
 
-        // Check if user is authenticated
-        function checkAuthentication() {
+        // Check authentication silently without showing compiler
+        function checkAuthenticationSilent() {
             const token = localStorage.getItem('ebpl_token');
             if (token && isValidToken(token)) {
                 const userData = localStorage.getItem('ebpl_user');
                 if (userData) {
                     currentUser = JSON.parse(userData);
-                    showCompiler();
-                } else {
-                    logout();
+                    // User is logged in but we won't show compiler until they explicitly login
+                    console.log('User is already logged in:', currentUser.name);
                 }
-            } else {
-                logout();
             }
         }
 
@@ -959,6 +960,11 @@ end while</pre>
                 return;
             }
             
+            if (password.length < 6) {
+                showMessage(signupMessage, 'Password must be at least 6 characters', 'error');
+                return;
+            }
+            
             // Get existing users
             const users = JSON.parse(localStorage.getItem('ebpl_users') || '[]');
             
@@ -1019,6 +1025,17 @@ end while</pre>
         function showAuth() {
             compilerSection.style.display = 'none';
             authSection.style.display = 'block';
+            
+            // Clear form fields
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('signupName').value = '';
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Clear messages
+            clearMessages();
         }
 
         function clearMessages() {
